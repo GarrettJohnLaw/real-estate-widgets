@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mortgage Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #ffffff00;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .calculator {
+        max-width: 400px;
+        padding: 20px;
+        background: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .calculator h2 {
+        text-align: center;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .result {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      canvas {
+        max-width: 100%;
+        height: 400px; /* Explicit height to prevent infinite loop */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="calculator">
+      <h2>Mortgage Calculator</h2>
+      <div class="form-group">
+        <label for="loanAmount">Loan Amount ($):</label>
+        <input type="number" id="loanAmount" placeholder="Enter loan amount" />
+      </div>
+      <div class="form-group">
+        <label for="interestRate">Annual Interest Rate (%):</label>
+        <input type="number" id="interestRate" step="0.01" placeholder="Enter interest rate" />
+      </div>
+      <div class="form-group">
+        <label for="loanTerm">Loan Term (years):</label>
+        <input type="number" id="loanTerm" placeholder="Enter loan term" />
+      </div>
+      <button onclick="calculateMortgage()">Calculate</button>
+      <div class="result" id="result"></div>
+    </div>
+
+    <canvas id="amortizationChart"></canvas>
+
+    <script>
+      let amortizationChart // Declare a variable to hold the chart instance
+
+      function calculateMortgage() {
+        const loanAmount = parseFloat(document.getElementById('loanAmount').value)
+        const interestRate = parseFloat(document.getElementById('interestRate').value) / 100 / 12
+        const loanTerm = parseInt(document.getElementById('loanTerm').value) * 12
+
+        if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(loanTerm)) {
+          document.getElementById('result').textContent = 'Please fill in all fields correctly.'
+          return
+        }
+
+        const monthlyPayment =
+          (loanAmount * interestRate * Math.pow(1 + interestRate, loanTerm)) /
+          (Math.pow(1 + interestRate, loanTerm) - 1)
+
+        document.getElementById(
+          'result'
+        ).textContent = `Estimated Monthly Payment: $${monthlyPayment.toFixed(2)}`
+
+        // Calculate amortization
+        let balance = loanAmount
+        const annualPrincipal = []
+        const annualInterest = []
+        const labels = []
+
+        let totalPrincipal = 0
+        let totalInterest = 0
+
+        for (let month = 1; month <= loanTerm; month++) {
+          const interestPayment = balance * interestRate
+          const principalPayment = monthlyPayment - interestPayment
+
+          totalPrincipal += principalPayment
+          totalInterest += interestPayment
+
+          balance -= principalPayment
+
+          // Push annual data
+          if (month % 12 === 0 || month === loanTerm) {
+            annualPrincipal.push(totalPrincipal.toFixed(2))
+            annualInterest.push(totalInterest.toFixed(2))
+            labels.push(`Year ${Math.ceil(month / 12)}`)
+            totalPrincipal = 0
+            totalInterest = 0
+          }
+        }
+
+        // Reset canvas before creating a new chart
+        const canvas = document.getElementById('amortizationChart')
+        const parent = canvas.parentNode
+        parent.removeChild(canvas) // Remove the existing canvas
+        const newCanvas = document.createElement('canvas') // Create a new canvas
+        newCanvas.id = 'amortizationChart'
+        parent.appendChild(newCanvas) // Add the new canvas to the DOM
+
+        const ctx = newCanvas.getContext('2d')
+
+        // Render chart
+        amortizationChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Principal',
+                data: annualPrincipal,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+              },
+              {
+                label: 'Interest',
+                data: annualInterest,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+              },
+            ],
+          },
+          options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: 'Year',
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: 'Payment Amount ($)',
+                },
+              },
+            },
+          },
+        })
+      }
+    </script>
+  </body>
+</html>
