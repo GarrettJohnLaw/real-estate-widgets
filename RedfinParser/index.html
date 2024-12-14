@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scatter Plot: Price/Sq Ft vs Total Price</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+  </head>
+  <body>
+    <h1>Scatter Plot: Price/Sq Ft vs Total Price</h1>
+    <p>Upload a CSV file containing columns for "PRICE" and "$ / SQUARE FEET".</p>
+    <input type="file" id="fileInput" accept=".csv" />
+    <div id="plot" style="width: 100%; max-width: 700px; height: 500px"></div>
+
+    <script>
+      document.getElementById('fileInput').addEventListener('change', function (event) {
+        const file = event.target.files[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = function (e) {
+          const csvData = e.target.result
+          parseCSVAndPlot(csvData)
+        }
+        reader.readAsText(file)
+      })
+
+      function parseCSVAndPlot(csvData) {
+        const rows = csvData.split('\n')
+        const headers = rows[0].split(',')
+
+        const priceIndex = headers.indexOf('PRICE')
+        const pricePerSqFtIndex = headers.indexOf('$/SQUARE FEET')
+
+        if (priceIndex === -1 || pricePerSqFtIndex === -1) {
+          alert('The CSV file must contain "PRICE" and "$ / SQUARE FEET" columns.')
+          return
+        }
+
+        const prices = []
+        const pricesPerSqFt = []
+
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i].split(',')
+          const price = parseFloat(row[priceIndex])
+          const pricePerSqFt = parseFloat(row[pricePerSqFtIndex])
+
+          if (!isNaN(price) && !isNaN(pricePerSqFt)) {
+            prices.push(price)
+            pricesPerSqFt.push(pricePerSqFt)
+          }
+        }
+
+        plotScatter(prices, pricesPerSqFt)
+      }
+
+      function plotScatter(prices, pricesPerSqFt) {
+        const trace = {
+          x: prices,
+          y: pricesPerSqFt,
+          mode: 'markers',
+          marker: { size: 8, opacity: 0.7 },
+          name: 'Price/Sq Ft vs Total Price',
+        }
+
+        const layout = {
+          title: 'Scatter Plot of Price/Sq Ft vs Total Price',
+          xaxis: { title: 'Total Price ($)' },
+          yaxis: { title: 'Price/Square Foot ($)' },
+          height: 500,
+          width: 700,
+        }
+
+        Plotly.newPlot('plot', [trace], layout)
+      }
+    </script>
+  </body>
+</html>

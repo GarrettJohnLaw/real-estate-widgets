@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Selector</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        display: flex;
+        height: 100vh;
+      }
+      .sidebar {
+        background-color: #f4f4f4;
+        width: 200px;
+        padding: 10px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+      .sidebar button {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 5px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      .sidebar button:hover {
+        background-color: #0056b3;
+      }
+      .content {
+        flex: 1;
+        padding: 20px;
+      }
+      .widget {
+        display: none;
+      }
+      .widget.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="sidebar">
+        <button onclick="showWidget('amortization')">Amortization Calculator</button>
+        <button onclick="showWidget('mortgage')">Mortgage Calculator</button>
+      </div>
+      <div class="content">
+        <div id="amortization" class="widget active">
+          <!-- Amortization Widget -->
+          <iframe
+            src="https://garrettjohnlaw.github.io/real-estate-widgets/Widgets/AmortizationCalculator/index.html"
+            width="100%"
+            height="900px"
+          ></iframe>
+        </div>
+        <div id="mortgage" class="widget">
+          <!-- Mortgage Widget -->
+          <iframe
+            src="https://garrettjohnlaw.github.io/real-estate-widgets/Widgets/MortgageCalculator/index.html"
+            width="100%"
+            height="500"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showWidget(widgetId) {
+        // Hide all widgets
+        const widgets = document.querySelectorAll('.widget')
+        widgets.forEach((widget) => widget.classList.remove('active'))
+
+        // Show the selected widget
+        document.getElementById(widgetId).classList.add('active')
+      }
+    </script>
+  </body>
+</html>
